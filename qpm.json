@@ -21,12 +21,17 @@
     },
     {
       "id": "beatsaber-hook",
-      "versionRange": "*",
+      "versionRange": "^1.0.0",
       "additionalData": {}
     },
     {
       "id": "custom-types",
       "versionRange": "^0.8.3",
+      "additionalData": {}
+    },
+    {
+      "id": "gorilla-utils",
+      "versionRange": "*",
       "additionalData": {}
     }
   ],

@@ -1,8 +1,10 @@
 #include "UI/PaintBallSettingsView.hpp"
 #include "monkecomputer/shared/ViewLib/CustomComputer.hpp"
 #include "monkecomputer/shared/ViewLib/MonkeWatch.hpp"
-
+#include "gorilla-utils/shared/CustomProperties/Player.hpp"
+#include "Photon/Pun/PhotonNetwork.hpp"
 #include "config.hpp"
+#include "MaterialColorCache.hpp"
 
 DEFINE_TYPE(PaintBall::PaintBallSettingsView);
 
@@ -18,7 +20,7 @@ namespace PaintBall
         monkeModeSelector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
         colorModeSelector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
 
-        settingSelector->max = 3;
+        settingSelector->max = 4;
         monkeModeSelector->max = 3;
         colorModeSelector->max = 2;
 
@@ -35,7 +37,19 @@ namespace PaintBall
 
     void PaintBallSettingsView::OnEnter(int index)
     {
-        if (index == 0) config.enabled ^= 1;
+        if (index == 0) 
+        {
+            config.enabled ^= 1;
+            GorillaUtils::Player::SetProperty<bool>(Photon::Pun::PhotonNetwork::get_LocalPlayer(), "paintballEnabled", config.enabled);
+            if (!config.enabled)
+            {
+                MaterialColorCache::Reset();
+            }
+        }
+        else if (index == 3)
+        {
+            MaterialColorCache::Reset();
+        }
     }
 
     void PaintBallSettingsView::Redraw()
@@ -49,6 +63,7 @@ namespace PaintBall
             CustomComputer::Redraw();
         else if (watch)
             MonkeWatch::Redraw();
+        SaveConfig();
     }
     
     void PaintBallSettingsView::DrawHeader()
@@ -95,6 +110,13 @@ namespace PaintBall
                 text += "RANDOM";
                 break;
         }
+        text += " <color=#AADDAA>></color>";
+
+        text += "\n";
+        text += "  Clean up:\n";
+        text += settingSelector->currentSelectionIndex == 3 ? " <color=#fd0000>></color> " : "   ";
+        text += "<color=#AADDAA><</color> ";
+        text += " RUN CLEANUP ";
         text += " <color=#AADDAA>></color>";
     }
     

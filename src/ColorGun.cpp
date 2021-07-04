@@ -13,6 +13,11 @@
 #include "Photon/Pun/PhotonNetwork.hpp"
 
 #include "ColorUtils.hpp"
+#include "MaterialColorCache.hpp"
+#include "EnabledCache.hpp"
+
+#include "gorilla-utils/shared/CustomProperties/Player.hpp"
+#include "gorilla-utils/shared/Utils/RPC.hpp"
 
 DEFINE_TYPE(PaintBall::Gun);
 
@@ -89,9 +94,14 @@ namespace PaintBall
             if (config.monkemode != 1 && rig && !cooldown) // just gorilla or all
             {
                 // about a second of delay
-                cooldown = 100;
-                PhotonView* photonview = PhotonView::Get(rig);
-                photonview->RPC(initializeNoobMaterial, RpcTarget::All, GorillaUI::BaseGameInterface::PlayerColor::get_colorArray(color.r, color.g, color.b));
+                if (PhotonNetwork::get_InRoom())
+                {
+                    cooldown = 100;
+                    PhotonView* photonView = PhotonView::Get(rig);
+                    Player* player = photonView->get_Owner();
+                    if (EnabledCache::get(player)) // if player has paintball enabled
+                        GorillaUtils::RPC::RPC(photonView, "InitializeNoobMaterial", player, color.r, color.g, color.b);
+                }
             }
 
             if (config.monkemode != 0 && !rig) // just rest or all
@@ -104,7 +114,11 @@ namespace PaintBall
                 for (int i = 0; i < matCount; i++)
                 {
                     Material* material = materials->values[i];
-                    if (material) material->set_color(color);
+                    if (material)
+                    {
+                        MaterialColorCache::add(material);
+                        material->set_color(color);
+                    } 
                 }
             }
         }

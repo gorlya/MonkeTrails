@@ -19,19 +19,41 @@
 #include "Photon/Pun/PhotonNetwork.hpp"
 #include "Photon/Pun/PhotonView.hpp"
 #include "Photon/Pun/RpcTarget.hpp"
+#include "Photon/Pun/PhotonMessageInfo.hpp"
 
 #include "GorillaLocomotion/Player.hpp"
 
 #include "custom-types/shared/register.hpp"
 #include "RayCastPlayerSelector.hpp"
 #include "ColorGun.hpp"
+#include "EnabledCache.hpp"
+#include "MaterialColorCache.hpp"
 #include "UI/PaintBallSettingsView.hpp"
+
+#include "gorilla-utils/shared/GorillaUtils.hpp"
+#include "gorilla-utils/shared/Callbacks/MatchMakingCallbacks.hpp"
+#include "gorilla-utils/shared/Callbacks/InRoomCallbacks.hpp"
+#include "gorilla-utils/shared/CustomProperties/Player.hpp"
+#include "gorilla-utils/shared/Utils/RPC.hpp"
 
 Logger& getLogger()
 {
     static Logger* logger = new Logger({ID, VERSION}, LoggerOptions(false, true));
     return *logger;
 }
+
+template<class T>
+T max (T first, T second)
+{
+    return first > second ? first : second;
+}
+
+template<class T>
+T max (T first, T second, T third)
+{
+    return max(max(first, second), third);
+}
+
 
 using namespace UnityEngine;
 
@@ -51,45 +73,51 @@ MAKE_HOOK_OFFSETLESS(Player_Awake, void, GorillaLocomotion::Player* self)
     PaintBall::RayCastPlayerSelector::useLeftHand = false;
 }
 
-MAKE_HOOK_OFFSETLESS(PhotonNetworkController_OnJoinedRoom, void, Il2CppObject* self)
+MAKE_HOOK_OFFSETLESS(VRRig_InitializeNoobMaterial, void, GlobalNamespace::VRRig* self, float red, float green, float blue, Photon::Pun::PhotonMessageInfo info)
 {
-    PhotonNetworkController_OnJoinedRoom(self);
-
-    Il2CppObject* currentRoom = CRASH_UNLESS(il2cpp_utils::RunMethod("Photon.Pun", "PhotonNetwork", "get_CurrentRoom"));
-
-    if (currentRoom)
+    // if not in room, run normal code
+    if (!Photon::Pun::PhotonNetwork::get_InRoom())
     {
-        // get wether or not this is a private room
-        allowPaintBall = !CRASH_UNLESS(il2cpp_utils::RunMethod<bool>(currentRoom, "get_IsVisible"));
-        
-        // create the c# string which will be the value we want to get from player prefs
-        static Il2CppString* currentQueue = il2cpp_utils::createcsstr("currentQueue", il2cpp_utils::StringType::Manual);
-
-        // get the game type (= queue), we registered a game type to the custom pc so if that one is active the mod can be active too
-        Il2CppString* queueCS = CRASH_UNLESS(il2cpp_utils::RunMethod<Il2CppString*>("UnityEngine", "PlayerPrefs", "GetString", currentQueue, il2cpp_utils::createcsstr("DEFAULT")));
-
-        // convert the c# string to a c++ string
-        std::string queue = to_utf8(csstrtostr(queueCS));
-
-        // as said before, if the queue is SPACEMONKE, we can allow the mod
-        if (queue.find("PAINTBALL") != std::string::npos || queue.find("MODDED") != std::string::npos)
-        {
-            allowPaintBall = true;
-        }
+        VRRig_InitializeNoobMaterial(self, red, green, blue, info);
+        return;
     }
-    else allowPaintBall = true;
 
-    // ? construction to switch what is logged, logs work like printf in C with the % placeholders
-    getLogger().info("Room Joined! %s", allowPaintBall ? "Room Was Private" : "Room Was not private");
+    Photon::Pun::PhotonView* photonView = Photon::Pun::PhotonView::Get(self);
 
-    if (!allowPaintBall) PaintBall::RayCastPlayerSelector::disable_point();
-}
+    Photon::Realtime::Player* player = photonView ? photonView->get_Owner() : nullptr;
+    // if enabled and allowed
+    auto neon = GorillaUtils::Player::GetProperty<bool>(player, "overrideNeon");
+    bool overrideNeon = neon ? *neon : false;
 
-MAKE_HOOK_OFFSETLESS(PhotonNetworkController_DisconnectCleanup, void, Il2CppObject* self)
-{
-    PhotonNetworkController_DisconnectCleanup(self);
+    auto localNeon = GorillaUtils::Player::GetProperty<bool>(Photon::Pun::PhotonNetwork::get_LocalPlayer(), "overrideNeon");
+    overrideNeon = overrideNeon && (localNeon ? *localNeon : false);
+    
+    float maxVal = max(red, green, blue);
+    
+    if (maxVal > 1.0f && !overrideNeon)
+    {
+        red /= maxVal;
+        green /= maxVal;
+        blue /= maxVal;
+    }
+    
+    VRRig_InitializeNoobMaterial(self, red, green, blue, info);
+    
+    // does the player that is affected have the mod enabled?
+    bool paintballEnabled = PaintBall::EnabledCache::get(player);
+    
+    getLogger().info("overrideNeon: %d, %d\npaintballEnabled: %d", (bool)neon, overrideNeon, paintballEnabled);
 
-    allowPaintBall = true;
+    // if enabled
+    // sender player is not local player
+    if (paintballEnabled && !info.Sender->Equals(Photon::Pun::PhotonNetwork::get_LocalPlayer())) 
+    {
+        self->InitializeNoobMaterialLocal(red, green, blue);
+        getLogger().info("Overriding colors on other player");
+
+        // if local player owns this rig, update the rest
+        if (Photon::Pun::PhotonNetwork::get_LocalPlayer()->Equals(player)) GorillaUtils::RPC::RPC(photonView, "InitializeNoobMaterial", Photon::Pun::RpcTarget::Others, red, green, blue);
+    }
 }
 
 extern "C" void setup(ModInfo& info)
@@ -115,8 +143,7 @@ extern "C" void load()
 
     Logger& logger = getLogger();
     INSTALL_HOOK_OFFSETLESS(logger, Player_Awake, il2cpp_utils::FindMethodUnsafe("GorillaLocomotion", "Player", "Awake", 0));
-    INSTALL_HOOK_OFFSETLESS(logger, PhotonNetworkController_OnJoinedRoom, il2cpp_utils::FindMethodUnsafe("", "PhotonNetworkController", "OnJoinedRoom", 0));
-    INSTALL_HOOK_OFFSETLESS(logger, PhotonNetworkController_DisconnectCleanup, il2cpp_utils::FindMethodUnsafe("", "PhotonNetworkController", "DisconnectCleanup", 0));
+    INSTALL_HOOK_OFFSETLESS(logger, VRRig_InitializeNoobMaterial, il2cpp_utils::FindMethodUnsafe("", "VRRig", "InitializeNoobMaterial", 4));
 
     custom_types::Register::RegisterType<PaintBall::RayCastPlayerSelector>();
     custom_types::Register::RegisterType<PaintBall::Gun>();
@@ -223,6 +250,20 @@ extern "C" void load()
 
     }, "Allows you to change the way painting works, using arguments to specify what is being changed\n  Please use the command as follows:\n  PAINT MODE\n  PAINT MODE [(M)ONKE/(R)EST/(A)LL]\n  PAINT COLOR\n  PAINT COLOR [(R)ANDOM/(O)WN]\n  PAINT [ENABLE/DISABLE]");
     
+    GorillaUtils::RegisterDisablingValue(ID, VERSION, allowPaintBall, true, {"MODDED", "PAINTBALL_CASUAL"});
+    GorillaUtils::MatchMakingCallbacks::add_OnJoinedRoom([&](){
+        if (!allowPaintBall)
+        {
+            PaintBall::MaterialColorCache::Reset();
+        }
+
+        GorillaUtils::Player::SetProperty<bool>(Photon::Pun::PhotonNetwork::get_LocalPlayer(), "paintballEnabled", config.enabled);
+    });
+
+    GorillaUtils::InRoomCallbacks::add_OnPlayerPropertiesUpdate([&](Photon::Realtime::Player* player, ExitGames::Client::Photon::Hashtable* changedProp) -> void {
+        PaintBall::EnabledCache::add(player);
+    });
+
     /*
     GorillaUI::CommandRegister::RegisterCommand("material", [](std::vector<std::string> args) -> std::string {
         if (args.size() == 0) return "  Invalid Argument!";

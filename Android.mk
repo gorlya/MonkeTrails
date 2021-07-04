@@ -65,13 +65,13 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := modloader
 LOCAL_EXPORT_C_INCLUDES := extern/modloader
 LOCAL_SRC_FILES := extern/libmodloader.so
-LOCAL_CPP_FEATURES := rtti exceptions
+LOCAL_CPP_FEATURES += rtti exceptions
 include $(PREBUILT_SHARED_LIBRARY)
 # If you would like to use more shared libraries (such as custom UI, utils, or more) add them here, following the format above.
 # In addition, ensure that you add them to the shared library build below.
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := paintball
+LOCAL_MODULE := marker
 LOCAL_SRC_FILES += $(call rwildcard,src/**,*.cpp)
 LOCAL_SRC_FILES += $(call rwildcard,extern/beatsaber-hook/src/inline-hook,*.cpp)
 LOCAL_SRC_FILES += $(call rwildcard,extern/beatsaber-hook/src/inline-hook,*.c)

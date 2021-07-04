@@ -24,8 +24,8 @@ namespace PaintBall
         monkeModeSelector->max = 3;
         colorModeSelector->max = 2;
 
-        monkeModeSelector->currentSelectionIndex = config.monkemode;
-        colorModeSelector->currentSelectionIndex = config.random;
+        monkeModeSelector->currentSelectionIndex = 2; // config.monkemode;
+        colorModeSelector->currentSelectionIndex = config.alwayson;
     }
 
     void PaintBallSettingsView::DidActivate(bool firstActivation)
@@ -98,16 +98,16 @@ namespace PaintBall
         text += " <color=#AADDAA>></color>";
 
         text += "\n";
-        text += "  Color Source:\n";
+        text += "  Always On:\n";
         text += settingSelector->currentSelectionIndex == 2 ? " <color=#fd0000>></color> " : "   ";
         text += "<color=#AADDAA><</color> ";
         switch (colorModeSelector->currentSelectionIndex)
         {
             case 0:
-                text += "OWN";
+                text += "OFF";
                 break;
             case 1:
-                text += "RANDOM";
+                text += "ON";
                 break;
         }
         text += " <color=#AADDAA>></color>";
@@ -139,8 +139,8 @@ namespace PaintBall
                     break;
             }
 
-            config.monkemode = monkeModeSelector->currentSelectionIndex;
-            config.random = colorModeSelector->currentSelectionIndex;
+            // config.monkemode = monkeModeSelector->currentSelectionIndex;
+            config.alwayson = colorModeSelector->currentSelectionIndex;
         }
         Redraw();
     }

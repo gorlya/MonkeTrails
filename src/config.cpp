@@ -20,8 +20,7 @@ void SaveConfig()
     getConfig().config.SetObject();
     rapidjson::Document::AllocatorType& allocator = getConfig().config.GetAllocator();
     
-    getConfig().config.AddMember("monkemode", config.monkemode, allocator);
-    getConfig().config.AddMember("random", config.random, allocator);
+    getConfig().config.AddMember("alwayson", config.alwayson, allocator);
 
     getConfig().Write();
     getLogger().info("Saved Configuration!");
@@ -33,16 +32,6 @@ bool LoadConfig()
     bool foundEverything = true;
     rapidjson::Document& doc = getConfig().config;
     
-    if (doc.HasMember("monkemode")) {
-        config.monkemode = doc["monkemode"].GetInt();
-    } else {
-        foundEverything = false;
-    }
-    if (doc.HasMember("random")) {
-        config.random = doc["random"].GetBool();
-    } else {
-        foundEverything = false;
-    }
     if (doc.HasMember("enabled")) {
         config.enabled = doc["enabled"].GetBool();
     } else {

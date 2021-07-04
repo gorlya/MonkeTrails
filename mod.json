@@ -1,12 +1,12 @@
 {
     "_QPVersion": "0.1.1",
-    "name": "PaintBall",
-    "id": "paintball",
+    "name": "Marker",
+    "id": "marker",
     "author": "RedBrumbler",
     "version": "1.1.0",
     "packageId": "com.AnotherAxiom.GorillaTag",
-    "packageVersion": "1.0.8",
-    "description": "Set other people's color with this mod!\ncopy your own or generate a random one",
+    "packageVersion": "1.0.9",
+    "description": "Write with Air Markers!",
     "coverImage": "cover.png",
     "type": "Gameplay",
     "dependencies": [
@@ -19,12 +19,18 @@
             "id": "gorillautils",
             "version": ">=0.1.9",
             "downloadIfMissing": "https://github.com/RedBrumbler/GorillaUtils/releases/latest/download/GorillaUtils.qmod"
+        },
+        {
+            "id": "monkecodegen",
+            "version": ">=0.6.0",
+            "downloadIfMissing": "https://github.com/RedBrumbler/MonkeCodegen/releases/download/0.6.0/MonkeCodegen.qmod"
         }
     ],
 	"modFiles": [
-		"libpaintball.so"
+		"libmarker.so"
     ],
     "libraryFiles": [
+    "libbeatsaber-hook_1_3_5.so",
     ],
     "fileCopies": [
     ]

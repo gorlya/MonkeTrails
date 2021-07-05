@@ -73,12 +73,12 @@ namespace Marker
     
     void MarkerSettingsView::DrawSettings()
     {
-        text += "  Paintball is:\n";
+        text += "  Trails are:\n";
         text += settingSelector->currentSelectionIndex == 0 ? " <color=#fd0000>></color> " : "   ";
         text += config.enabled ? "<color=#00fd00>enabled</color>" : "<color=#fd0000>disabled</color>";
         text += "\n";
 
-        text += "  Paint Mode:\n";
+        text += "  Draw Mode:\n";
         text += settingSelector->currentSelectionIndex == 1 ? " <color=#fd0000>></color> " : "   ";
         text += "<color=#AADDAA><</color> ";
         switch (monkeModeSelector->currentSelectionIndex)

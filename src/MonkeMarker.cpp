@@ -22,17 +22,17 @@
 #include <deque>
 
 
-DEFINE_TYPE(PaintBall::MonkeMarker);
+DEFINE_TYPE(Marker::MonkeMarker);
 
 using namespace UnityEngine;
 
 extern Logger& getLogger();
 
-extern bool allowPaintBall;
+extern bool allowMarker;
 static int lCooldown = 0;
 static int rCooldown = 0;
 
-namespace PaintBall
+namespace Marker
 {
     Transform* MonkeMarker::markerEndPoint = nullptr;
     LineRenderer *lRend = nullptr;
@@ -90,7 +90,7 @@ namespace PaintBall
     }
     void MonkeMarker::Update()
     {
-        if (!config.enabled) { return; }
+        if (!config.enabled || config.monkemode == 1) { return; }
 
         if (rCooldown > 0) { rCooldown--; }
         if (lCooldown > 0) { lCooldown--; }

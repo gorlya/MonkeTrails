@@ -4,7 +4,7 @@
 #include "UnityEngine/Color.hpp"
 #include <optional>
 
-namespace PaintBall::MaterialColorCache
+namespace Marker::MaterialColorCache
 {
     /// @brief adds color to map with mat as key
     /// Doesn't overwrite already added things

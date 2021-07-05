@@ -1,6 +1,6 @@
 #include "MaterialColorCache.hpp"
 #include <map>
-namespace PaintBall::MaterialColorCache
+namespace Marker::MaterialColorCache
 {
     using ColorCache = std::map<UnityEngine::Material*, UnityEngine::Color>;
     ColorCache colorCache = {};

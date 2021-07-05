@@ -84,6 +84,6 @@ LOCAL_SHARED_LIBRARIES += zip
 LOCAL_SHARED_LIBRARIES += monkecodegen_0_6_0
 LOCAL_SHARED_LIBRARIES += gorilla-utils
 LOCAL_LDLIBS += -llog
-LOCAL_CFLAGS += -I'extern/libil2cpp/il2cpp/libil2cpp' -isystem 'extern' -I'extern/monkecodegen/include' -DID='"PaintBall"' -DVERSION='"1.1.0"' -I'./shared' -I'./extern' -Wno-inaccessible-base
+LOCAL_CFLAGS += -I'extern/libil2cpp/il2cpp/libil2cpp' -isystem 'extern' -I'extern/monkecodegen/include' -DID='"Marker"' -DVERSION='"1.1.0"' -I'./shared' -I'./extern' -Wno-inaccessible-base
 LOCAL_C_INCLUDES += ./include ./src
 include $(BUILD_SHARED_LIBRARY)

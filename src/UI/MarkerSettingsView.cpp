@@ -1,4 +1,4 @@
-#include "UI/PaintBallSettingsView.hpp"
+#include "UI/MarkerSettingsView.hpp"
 #include "monkecomputer/shared/ViewLib/CustomComputer.hpp"
 #include "monkecomputer/shared/ViewLib/MonkeWatch.hpp"
 #include "gorilla-utils/shared/CustomProperties/Player.hpp"
@@ -6,15 +6,15 @@
 #include "config.hpp"
 #include "MaterialColorCache.hpp"
 
-DEFINE_TYPE(PaintBall::PaintBallSettingsView);
+DEFINE_TYPE(Marker::MarkerSettingsView);
 
 extern Logger& getLogger();
 
 using namespace GorillaUI;
 
-namespace PaintBall
+namespace Marker
 {
-    void PaintBallSettingsView::Awake()
+    void MarkerSettingsView::Awake()
     {
         settingSelector = new UISelectionHandler(EKeyboardKey::Up, EKeyboardKey::Down, EKeyboardKey::Enter, true, false);
         monkeModeSelector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
@@ -24,18 +24,18 @@ namespace PaintBall
         monkeModeSelector->max = 3;
         colorModeSelector->max = 2;
 
-        monkeModeSelector->currentSelectionIndex = 2; // config.monkemode;
+        monkeModeSelector->currentSelectionIndex = config.monkemode;
         colorModeSelector->currentSelectionIndex = config.alwayson;
     }
 
-    void PaintBallSettingsView::DidActivate(bool firstActivation)
+    void MarkerSettingsView::DidActivate(bool firstActivation)
     {
-        std::function<void(int)> fun = std::bind(&PaintBallSettingsView::OnEnter, this, std::placeholders::_1);
+        std::function<void(int)> fun = std::bind(&MarkerSettingsView::OnEnter, this, std::placeholders::_1);
         settingSelector->selectionCallback = fun;
         Redraw();
     }
 
-    void PaintBallSettingsView::OnEnter(int index)
+    void MarkerSettingsView::OnEnter(int index)
     {
         if (index == 0) 
         {
@@ -52,7 +52,7 @@ namespace PaintBall
         }
     }
 
-    void PaintBallSettingsView::Redraw()
+    void MarkerSettingsView::Redraw()
     {
         text = "";
 
@@ -66,12 +66,12 @@ namespace PaintBall
         SaveConfig();
     }
     
-    void PaintBallSettingsView::DrawHeader()
+    void MarkerSettingsView::DrawHeader()
     {
-        text += "<color=#ffff00>== <color=#fdfdfd>PaintBall Settings</color> ==</color>\n";
+        text += "<color=#ffff00>== <color=#fdfdfd>Marker Settings</color> ==</color>\n";
     }
     
-    void PaintBallSettingsView::DrawSettings()
+    void MarkerSettingsView::DrawSettings()
     {
         text += "  Paintball is:\n";
         text += settingSelector->currentSelectionIndex == 0 ? " <color=#fd0000>></color> " : "   ";
@@ -84,10 +84,10 @@ namespace PaintBall
         switch (monkeModeSelector->currentSelectionIndex)
         {
             case 0:
-                text += "MONKEY";
+                text += "MARKER";
                 break;
             case 1:
-                text += "REST";
+                text += "TRAILS";
                 break;
             case 2:
                 text += "ALL";
@@ -120,7 +120,7 @@ namespace PaintBall
         text += " <color=#AADDAA>></color>";
     }
     
-    void PaintBallSettingsView::OnKeyPressed(int value)
+    void MarkerSettingsView::OnKeyPressed(int value)
     {
         EKeyboardKey key = (EKeyboardKey)value;
         if (!settingSelector->HandleKey(key)) // if it was not up/down/enter
@@ -139,7 +139,7 @@ namespace PaintBall
                     break;
             }
 
-            // config.monkemode = monkeModeSelector->currentSelectionIndex;
+            config.monkemode = monkeModeSelector->currentSelectionIndex;
             config.alwayson = colorModeSelector->currentSelectionIndex;
         }
         Redraw();

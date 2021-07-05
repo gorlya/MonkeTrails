@@ -7,7 +7,7 @@
 #include "UnityEngine/Color.hpp"
 #include "GlobalNamespace/VRRig.hpp"
 
-DECLARE_CLASS_CODEGEN(PaintBall, MonkeMarker, UnityEngine::MonoBehaviour,
+DECLARE_CLASS_CODEGEN(Marker, MonkeMarker, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_FIELD(bool, isRight);
     DECLARE_METHOD(void, Update);
     DECLARE_METHOD(void, Awake);

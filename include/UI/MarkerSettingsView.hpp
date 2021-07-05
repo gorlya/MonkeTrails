@@ -5,7 +5,7 @@
 #include "monkecomputer/shared/InputHandlers/UISelectionHandler.hpp"
 #include "monkecomputer/shared/InputHandlers/UIToggleInputHandler.hpp"
 
-DECLARE_CLASS_CODEGEN(PaintBall, PaintBallSettingsView, GorillaUI::Components::View,
+DECLARE_CLASS_CODEGEN(Marker, MarkerSettingsView, GorillaUI::Components::View,
     DECLARE_METHOD(void, Awake);
     DECLARE_METHOD(void, DidActivate, bool firstActivation);
     DECLARE_METHOD(void, Redraw);

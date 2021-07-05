@@ -14,16 +14,15 @@ namespace Trail
 
     std::map<int, UnityEngine::LineRenderer*> monkeRenderer;
     std::map<int, std::deque<UnityEngine::Vector3>> monkeLines;
-    int maxPoints = 50;
+    int maxPoints = 50, cooldownAmount = 10;
     void MonkeTrail::ctor()
     {
-        getLogger().info("CREATED MONKE TRAIL");
         cooldown = 0;
     }
 
     void MonkeTrail::Awake()
     {
-        getLogger().info("AWAKE MONKE TRAIL, %i", playerId);
+
     }
 
     void RenderPoints(UnityEngine::LineRenderer *cRend, std::deque<UnityEngine::Vector3> &points, UnityEngine::Vector3 pos) {
@@ -42,11 +41,18 @@ namespace Trail
     }
     void MonkeTrail::Update()
     {
+
+        if (!config.enabled) {
+          return;
+        }
+
+        if (config.monkemode == 0) { return; }
+
         if (cooldown > 0) {
             cooldown--;
             return;
         }
-        cooldown = 10;
+        cooldown = cooldownAmount;
 
         if (!markerEndPoint)
         {
@@ -67,7 +73,9 @@ namespace Trail
 
         UnityEngine::Vector3 pos = get_transform()->get_position();
         auto &pts = monkeLines[playerId];
+
         RenderPoints(monkeRenderer[playerId], pts, pos);
+
 
     }
 }

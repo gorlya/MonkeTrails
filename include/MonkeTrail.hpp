@@ -29,3 +29,6 @@ DECLARE_CLASS_CODEGEN(Trail, MonkeTrail, UnityEngine::MonoBehaviour,
         REGISTER_FIELD(markerEndPoint);
     )
 )
+namespace Trail {
+    void Clear(int);
+}

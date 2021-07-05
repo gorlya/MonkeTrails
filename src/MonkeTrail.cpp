@@ -81,4 +81,18 @@ namespace Trail
 
 
     }
+
+    void Clear(int playerId)
+    {
+        getLogger().info("MONKE PLAYER LEFT: %d", playerId);
+        auto lineRenderer = monkeRenderer.find(playerId);
+        auto ml = monkeLines.find(playerId);
+        if (lineRenderer != monkeRenderer.end()) {
+            lineRenderer->second->set_positionCount(0);
+            monkeRenderer.erase(lineRenderer);
+        }
+        if (ml != monkeLines.end()) {
+            monkeLines.erase(ml);
+        }
+    }
 }

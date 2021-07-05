@@ -108,6 +108,10 @@ namespace PaintBall
                     return;
                 }
                 config.alwayson = !config.alwayson;
+                if (!config.alwayson) {
+                    lPoints.clear();
+                    rPoints.clear();
+                }
                 rCooldown = 10;
                 lCooldown = 10;
                 return;

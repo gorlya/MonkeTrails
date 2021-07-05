@@ -12,6 +12,7 @@
 #include "GlobalNamespace/OVRInput.hpp"
 
 #include "UnityEngine/Material.hpp"
+#include "UnityEngine/SkinnedMeshRenderer.hpp"
 #include "UnityEngine/Transform.hpp"
 #include "UnityEngine/GameObject.hpp"
 
@@ -21,14 +22,20 @@
 #include "Photon/Pun/PhotonView.hpp"
 #include "Photon/Pun/RpcTarget.hpp"
 #include "Photon/Pun/PhotonMessageInfo.hpp"
+#include "Photon/Realtime/Player.hpp"
 
 #include "GorillaLocomotion/Player.hpp"
 
 #include "custom-types/shared/register.hpp"
 #include "MonkeMarker.hpp"
+#include "MonkeTrail.hpp"
 #include "UI/PaintBallSettingsView.hpp"
 
 #include "gorilla-utils/shared/GorillaUtils.hpp"
+#include "gorilla-utils/shared/Utils/Player.hpp"
+#include "gorilla-utils/shared/Callbacks/InRoomCallbacks.hpp"
+#include <map>
+#include <deque>
 
 Logger& getLogger()
 {
@@ -52,6 +59,7 @@ T max (T first, T second, T third)
 using namespace UnityEngine;
 
 bool allowPaintBall = true;
+std::map<int,std::deque<Vector3>> monkeMap;
 
 MAKE_HOOK_OFFSETLESS(Player_Awake, void, GorillaLocomotion::Player* self)
 {
@@ -63,6 +71,7 @@ MAKE_HOOK_OFFSETLESS(Player_Awake, void, GorillaLocomotion::Player* self)
     PaintBall::MonkeMarker* leftSelector = leftHand->get_gameObject()->AddComponent<PaintBall::MonkeMarker*>();
     PaintBall::MonkeMarker* rightSelector = rightHand->get_gameObject()->AddComponent<PaintBall::MonkeMarker*>();
     rightSelector->isRight = true;
+
 }
 
 extern "C" void setup(ModInfo& info)
@@ -89,7 +98,34 @@ extern "C" void load()
     Logger& logger = getLogger();
     INSTALL_HOOK_OFFSETLESS(logger, Player_Awake, il2cpp_utils::FindMethodUnsafe("GorillaLocomotion", "Player", "Awake", 0));
 
+    GorillaUtils::InRoomCallbacks::add_OnPlayerPropertiesUpdate([&](auto player, auto){
+        getLogger().info("MONKE JOINED ROOM");
+        VRRig* monkeRig = GorillaUtils::Player::findPlayerVRRig(player);
+        if (monkeRig != nullptr) {
+            int playerId = player->actorNumber;
+            UnityEngine::GameObject* monkeHead = monkeRig->headMesh;
+            auto mat = monkeRig->mainSkin->get_material();
+            getLogger().info("MONKES: %i %x", playerId, monkeHead);
+            Trail::MonkeTrail* trail = monkeHead->GetComponent<Trail::MonkeTrail*>();
+            if (trail == nullptr) {
+                trail = monkeHead->AddComponent<Trail::MonkeTrail*>();
+            }
+
+            if (trail != nullptr) {
+                trail->playerId = playerId;
+                trail->material = mat;
+            }
+
+        }
+    });
+
+    GorillaUtils::InRoomCallbacks::add_OnPlayerLeftRoom([&](auto *player){
+        getLogger().info("LEFT ROOM");
+        monkeMap.clear();
+    });
+
     custom_types::Register::RegisterType<PaintBall::MonkeMarker>();
+    custom_types::Register::RegisterType<Trail::MonkeTrail>();
     custom_types::Register::RegisterType<PaintBall::PaintBallSettingsView>();
 
     GorillaUI::Register::RegisterSettingsView<PaintBall::PaintBallSettingsView*>("Marker", VERSION);

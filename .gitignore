@@ -1,4 +1,4 @@
-extern/
+extern
 libs/
 obj/
 *.log
@@ -7,3 +7,4 @@ qpm.shared.json
 *.backup
 *.zip
 *.qmod
+build.sh

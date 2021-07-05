@@ -2,9 +2,9 @@
   "sharedDir": "shared",
   "dependenciesDir": "extern",
   "info": {
-    "name": "PaintBall",
-    "id": "PaintBall",
-    "version": "0.1.0",
+    "name": "Marker",
+    "id": "Marker",
+    "version": "0.0.1",
     "url": null,
     "additionalData": {}
   },

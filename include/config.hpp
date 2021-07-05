@@ -2,7 +2,7 @@
 
 struct config_t {
     int monkemode = 1;
-    bool enabled = false;
+    bool enabled = true;
     bool alwayson = false;
 };
 

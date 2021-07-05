@@ -56,6 +56,10 @@ namespace Marker
             lRend = lpoint->AddComponent<LineRenderer*>();
             rRend = rpoint->AddComponent<LineRenderer*>();
 
+            auto mat = lRend->get_material();
+            mat->set_color({ 0, 1, 1});
+
+
             Object::DontDestroyOnLoad(lpoint);
             Object::DontDestroyOnLoad(rpoint);
             markerEndPoint = lpoint->get_transform();

@@ -39,14 +39,17 @@ namespace Trail
             cRend->SetPosition(i++, pt);
         }
     }
+
     void MonkeTrail::Update()
     {
 
-        if (!config.enabled) {
+        if (!config.enabled || config.monkemode == 0) {
+          auto &pts = monkeLines[playerId];
+          pts.clear();
+          if (markerEndPoint) { monkeRenderer[playerId]->set_positionCount(0); }
+
           return;
         }
-
-        if (config.monkemode == 0) { return; }
 
         if (cooldown > 0) {
             cooldown--;

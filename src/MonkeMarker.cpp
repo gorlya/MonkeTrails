@@ -90,7 +90,13 @@ namespace Marker
     }
     void MonkeMarker::Update()
     {
-        if (!config.enabled || config.monkemode == 1) { return; }
+        if (!config.enabled || config.monkemode == 1) {
+          lPoints.clear();
+          rPoints.clear();
+          lRend->set_positionCount(0);
+          rRend->set_positionCount(0);
+          return;
+        }
 
         if (rCooldown > 0) { rCooldown--; }
         if (lCooldown > 0) { lCooldown--; }
@@ -121,7 +127,7 @@ namespace Marker
             {
                 RenderPoints(rRend, rPoints, pos, rightGtn);
                 rCooldown = 10;
-            } 
+            }
 
             if (!lCooldown && (!isRight && (leftBtn || config.alwayson)))
             {

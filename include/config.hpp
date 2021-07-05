@@ -1,8 +1,8 @@
 #pragma once
 
 struct config_t {
-    int monkemode = 2;
-    bool enabled = true;
+    int monkemode = 1;
+    bool enabled = false;
     bool alwayson = false;
 };
 

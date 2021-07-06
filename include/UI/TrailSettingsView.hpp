@@ -5,7 +5,7 @@
 #include "monkecomputer/shared/InputHandlers/UISelectionHandler.hpp"
 #include "monkecomputer/shared/InputHandlers/UIToggleInputHandler.hpp"
 
-DECLARE_CLASS_CODEGEN(Marker, MarkerSettingsView, GorillaUI::Components::View,
+DECLARE_CLASS_CODEGEN(Trail, TrailSettingsView, GorillaUI::Components::View,
     DECLARE_METHOD(void, Awake);
     DECLARE_METHOD(void, DidActivate, bool firstActivation);
     DECLARE_METHOD(void, Redraw);
@@ -16,8 +16,6 @@ DECLARE_CLASS_CODEGEN(Marker, MarkerSettingsView, GorillaUI::Components::View,
 
     public:
         GorillaUI::UISelectionHandler* settingSelector = nullptr;
-        GorillaUI::UISelectionHandler* monkeModeSelector = nullptr;
-        GorillaUI::UISelectionHandler* colorModeSelector = nullptr;
         
     REGISTER_FUNCTION(
         REGISTER_METHOD(Awake);

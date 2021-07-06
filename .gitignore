@@ -8,3 +8,5 @@ qpm.shared.json
 *.zip
 *.qmod
 build.sh
+.ccls
+compile_commands.json

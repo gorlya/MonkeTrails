@@ -31,4 +31,5 @@ DECLARE_CLASS_CODEGEN(Trail, MonkeTrail, UnityEngine::MonoBehaviour,
 )
 namespace Trail {
     void Clear(int);
+    void ClearAll();
 }

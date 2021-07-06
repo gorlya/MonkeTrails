@@ -27,13 +27,13 @@
 #include "GorillaLocomotion/Player.hpp"
 
 #include "custom-types/shared/register.hpp"
-#include "MonkeMarker.hpp"
 #include "MonkeTrail.hpp"
-#include "UI/MarkerSettingsView.hpp"
+#include "UI/TrailSettingsView.hpp"
 
 #include "gorilla-utils/shared/GorillaUtils.hpp"
 #include "gorilla-utils/shared/Utils/Player.hpp"
 #include "gorilla-utils/shared/Callbacks/InRoomCallbacks.hpp"
+#include "gorilla-utils/shared/Callbacks/MatchMakingCallbacks.hpp"
 #include <map>
 #include <deque>
 
@@ -58,17 +58,26 @@ T max (T first, T second, T third)
 
 using namespace UnityEngine;
 
-MAKE_HOOK_OFFSETLESS(Player_Awake, void, GorillaLocomotion::Player* self)
-{
-    Player_Awake(self);
+void markMonke(auto *player) {
+    if (player == nullptr) { return; }
 
-    Transform* leftHand = self->get_transform()->Find(il2cpp_utils::createcsstr("TurnParent/LeftHand Controller"));
-    Transform* rightHand = self->get_transform()->Find(il2cpp_utils::createcsstr("TurnParent/RightHand Controller"));
+    using namespace GlobalNamespace;
+    VRRig* monkeRig = GorillaUtils::Player::findPlayerVRRig(player);
+    if (monkeRig != nullptr) {
+        int playerId = player->actorNumber;
+        UnityEngine::GameObject* monkeHead = monkeRig->headMesh;
+        auto mat = monkeRig->mainSkin->get_material();
+        Trail::MonkeTrail* trail = monkeHead->GetComponent<Trail::MonkeTrail*>();
+        if (trail == nullptr) {
+            trail = monkeHead->AddComponent<Trail::MonkeTrail*>();
+        }
 
-    Marker::MonkeMarker* leftSelector = leftHand->get_gameObject()->AddComponent<Marker::MonkeMarker*>();
-    Marker::MonkeMarker* rightSelector = rightHand->get_gameObject()->AddComponent<Marker::MonkeMarker*>();
-    rightSelector->isRight = true;
+        if (trail != nullptr) {
+            trail->playerId = playerId;
+            trail->material = mat;
+        }
 
+    }
 }
 
 extern "C" void setup(ModInfo& info)
@@ -93,27 +102,12 @@ extern "C" void load()
     using namespace Photon::Realtime;
 
     Logger& logger = getLogger();
-    INSTALL_HOOK_OFFSETLESS(logger, Player_Awake, il2cpp_utils::FindMethodUnsafe("GorillaLocomotion", "Player", "Awake", 0));
 
+    GorillaUtils::MatchMakingCallbacks::add_OnLeftRoom([&](){ Trail::ClearAll(); });
+    GorillaUtils::MatchMakingCallbacks::add_OnJoinedRoom([&](){ Trail::ClearAll(); });
     GorillaUtils::InRoomCallbacks::add_OnPlayerPropertiesUpdate([&](auto player, auto){
-        VRRig* monkeRig = GorillaUtils::Player::findPlayerVRRig(player);
-        if (monkeRig != nullptr) {
-            int playerId = player->actorNumber;
-            UnityEngine::GameObject* monkeHead = monkeRig->headMesh;
-            auto mat = monkeRig->mainSkin->get_material();
-            Trail::MonkeTrail* trail = monkeHead->GetComponent<Trail::MonkeTrail*>();
-            if (trail == nullptr) {
-                trail = monkeHead->AddComponent<Trail::MonkeTrail*>();
-            }
-
-            if (trail != nullptr) {
-                trail->playerId = playerId;
-                trail->material = mat;
-            }
-
-        }
+        markMonke(player);
     });
-
     GorillaUtils::InRoomCallbacks::add_OnPlayerLeftRoom([&](auto player){
         if (player != nullptr) {
             int playerId = player->actorNumber;
@@ -121,12 +115,11 @@ extern "C" void load()
         }
     });
 
-    custom_types::Register::RegisterType<Marker::MonkeMarker>();
     custom_types::Register::RegisterType<Trail::MonkeTrail>();
-    custom_types::Register::RegisterType<Marker::MarkerSettingsView>();
+    custom_types::Register::RegisterType<Trail::TrailSettingsView>();
 
-    GorillaUI::Register::RegisterSettingsView<Marker::MarkerSettingsView*>("Marker", VERSION);
-    GorillaUI::Register::RegisterWatchView<Marker::MarkerSettingsView*>("Marker", VERSION);
+    GorillaUI::Register::RegisterSettingsView<Trail::TrailSettingsView*>("Trail", VERSION);
+    GorillaUI::Register::RegisterWatchView<Trail::TrailSettingsView*>("Trail", VERSION);
 
     GorillaUI::CommandRegister::RegisterCommand("marker", [](std::vector<std::string> args) -> std::string {
         return "Not implemented yet.";

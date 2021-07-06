@@ -2,8 +2,8 @@
   "sharedDir": "shared",
   "dependenciesDir": "extern",
   "info": {
-    "name": "Marker",
-    "id": "Marker",
+    "name": "Trails",
+    "id": "Trails",
     "version": "0.0.1",
     "url": null,
     "additionalData": {}

@@ -58,25 +58,35 @@ T max (T first, T second, T third)
 
 using namespace UnityEngine;
 
+bool moddedRoom = true;
 void markMonke(auto *player) {
     if (player == nullptr) { return; }
+    if (!moddedRoom) {
+      auto self = Photon::Pun::PhotonNetwork::get_LocalPlayer();
+      auto selfId = self->actorNumber;
+      if (selfId != player->actorNumber) {
+        return;
+      }
+    }
 
     using namespace GlobalNamespace;
     VRRig* monkeRig = GorillaUtils::Player::findPlayerVRRig(player);
     if (monkeRig != nullptr) {
         int playerId = player->actorNumber;
         UnityEngine::GameObject* monkeHead = monkeRig->headMesh;
-        auto mat = monkeRig->mainSkin->get_material();
-        Trail::MonkeTrail* trail = monkeHead->GetComponent<Trail::MonkeTrail*>();
-        if (trail == nullptr) {
-            trail = monkeHead->AddComponent<Trail::MonkeTrail*>();
-        }
+        if (monkeHead!= nullptr && monkeRig->mainSkin != nullptr) {
+          auto mat = monkeRig->mainSkin->get_material();
+          Trail::MonkeTrail* trail = monkeHead->GetComponent<Trail::MonkeTrail*>();
+          if (trail == nullptr) {
+              trail = monkeHead->AddComponent<Trail::MonkeTrail*>();
+          }
 
-        if (trail != nullptr) {
-            trail->playerId = playerId;
-            trail->material = mat;
-        }
+          if (trail != nullptr) {
+              trail->playerId = playerId;
+              trail->material = mat;
+          }
 
+        }
     }
 }
 
@@ -93,9 +103,9 @@ extern "C" void load()
     srand(time(&t));
 
     if (!LoadConfig()) SaveConfig();
-    
+
     GorillaUI::Innit();
-    
+
     using namespace GlobalNamespace;
 
     using namespace Photon::Pun;
@@ -104,7 +114,21 @@ extern "C" void load()
     Logger& logger = getLogger();
 
     GorillaUtils::MatchMakingCallbacks::add_OnLeftRoom([&](){ Trail::ClearAll(); });
-    GorillaUtils::MatchMakingCallbacks::add_OnJoinedRoom([&](){ Trail::ClearAll(); });
+    GorillaUtils::MatchMakingCallbacks::add_OnJoinedRoom([&](){
+      Trail::ClearAll();
+			Il2CppObject* currentRoom = CRASH_UNLESS(il2cpp_utils::RunMethod("Photon.Pun", "PhotonNetwork", "get_CurrentRoom"));
+			if (currentRoom) {
+				moddedRoom = !CRASH_UNLESS(il2cpp_utils::RunMethod<bool>(currentRoom, "get_IsVisible"));
+			}
+
+			Array<Player*>* players = PhotonNetwork::get_PlayerList();
+			int playerCount = players->Length();
+
+			for (int i = 0; i < playerCount; i++) {
+				Player* player = players->values[i];
+				markMonke(player);
+			}
+    });
     GorillaUtils::InRoomCallbacks::add_OnPlayerPropertiesUpdate([&](auto player, auto){
         markMonke(player);
     });

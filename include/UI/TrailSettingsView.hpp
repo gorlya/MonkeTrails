@@ -16,6 +16,9 @@ DECLARE_CLASS_CODEGEN(Trail, TrailSettingsView, GorillaUI::Components::View,
 
     public:
         GorillaUI::UISelectionHandler* settingSelector = nullptr;
+        GorillaUI::UISelectionHandler* trailModeSelector = nullptr;
+        GorillaUI::UISelectionHandler* trailSizeSelector = nullptr;
+        GorillaUI::UISelectionHandler* trailWidthSelector = nullptr;
         
     REGISTER_FUNCTION(
         REGISTER_METHOD(Awake);

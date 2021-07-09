@@ -32,4 +32,7 @@ DECLARE_CLASS_CODEGEN(Trail, MonkeTrail, UnityEngine::MonoBehaviour,
 namespace Trail {
     void Clear(int);
     void ClearAll();
+    void markMonke(Photon::Realtime::Player *player);
+    void updateMonkes();
+    void setModded(bool);
 }

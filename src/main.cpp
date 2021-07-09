@@ -58,38 +58,6 @@ T max (T first, T second, T third)
 
 using namespace UnityEngine;
 
-bool moddedRoom = true;
-void markMonke(auto *player) {
-    if (player == nullptr) { return; }
-    if (!moddedRoom) {
-      auto self = Photon::Pun::PhotonNetwork::get_LocalPlayer();
-      auto selfId = self->actorNumber;
-      if (selfId != player->actorNumber) {
-        return;
-      }
-    }
-
-    using namespace GlobalNamespace;
-    VRRig* monkeRig = GorillaUtils::Player::findPlayerVRRig(player);
-    if (monkeRig != nullptr) {
-        int playerId = player->actorNumber;
-        UnityEngine::GameObject* monkeHead = monkeRig->headMesh;
-        if (monkeHead!= nullptr && monkeRig->mainSkin != nullptr) {
-          auto mat = monkeRig->mainSkin->get_material();
-          Trail::MonkeTrail* trail = monkeHead->GetComponent<Trail::MonkeTrail*>();
-          if (trail == nullptr) {
-              trail = monkeHead->AddComponent<Trail::MonkeTrail*>();
-          }
-
-          if (trail != nullptr) {
-              trail->playerId = playerId;
-              trail->material = mat;
-          }
-
-        }
-    }
-}
-
 extern "C" void setup(ModInfo& info)
 {
     info.id = ID;
@@ -118,19 +86,13 @@ extern "C" void load()
       Trail::ClearAll();
 			Il2CppObject* currentRoom = CRASH_UNLESS(il2cpp_utils::RunMethod("Photon.Pun", "PhotonNetwork", "get_CurrentRoom"));
 			if (currentRoom) {
-				moddedRoom = !CRASH_UNLESS(il2cpp_utils::RunMethod<bool>(currentRoom, "get_IsVisible"));
+				Trail::setModded(!CRASH_UNLESS(il2cpp_utils::RunMethod<bool>(currentRoom, "get_IsVisible")));
 			}
 
-			Array<Player*>* players = PhotonNetwork::get_PlayerList();
-			int playerCount = players->Length();
-
-			for (int i = 0; i < playerCount; i++) {
-				Player* player = players->values[i];
-				markMonke(player);
-			}
+      Trail::updateMonkes();
     });
     GorillaUtils::InRoomCallbacks::add_OnPlayerPropertiesUpdate([&](auto player, auto){
-        markMonke(player);
+        Trail::markMonke(player);
     });
     GorillaUtils::InRoomCallbacks::add_OnPlayerLeftRoom([&](auto player){
         if (player != nullptr) {

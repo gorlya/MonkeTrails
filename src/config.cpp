@@ -20,7 +20,10 @@ void SaveConfig()
     getConfig().config.SetObject();
     rapidjson::Document::AllocatorType& allocator = getConfig().config.GetAllocator();
     
-    getConfig().config.AddMember("alwayson", config.alwayson, allocator);
+    getConfig().config.AddMember("enabled", config.enabled, allocator);
+    getConfig().config.AddMember("trailmode", config.trailmode, allocator);
+    getConfig().config.AddMember("trailsize", config.trailsize, allocator);
+    getConfig().config.AddMember("trailwidth", config.trailwidth, allocator);
 
     getConfig().Write();
     getLogger().info("Saved Configuration!");
@@ -32,11 +35,10 @@ bool LoadConfig()
     bool foundEverything = true;
     rapidjson::Document& doc = getConfig().config;
     
-    if (doc.HasMember("enabled")) {
-        config.enabled = doc["enabled"].GetBool();
-    } else {
-        foundEverything = false;
-    }
+    if (doc.HasMember("enabled")) { config.enabled = doc["enabled"].GetBool(); }
+    if (doc.HasMember("trailmode")) { config.trailmode = doc["trailmode"].GetInt(); } 
+    if (doc.HasMember("trailsize")) { config.trailsize = doc["trailsize"].GetInt(); } 
+    if (doc.HasMember("trailwidth")) { config.trailwidth = doc["trailwidth"].GetInt(); } 
 
     if (foundEverything) getLogger().info("Config Loaded Successfully!");
     return foundEverything;

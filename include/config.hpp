@@ -1,9 +1,10 @@
 #pragma once
 
 struct config_t {
-    int monkemode = 1;
     bool enabled = true;
-    bool alwayson = false;
+    int trailmode = 1;
+    int trailsize = 1;
+    int trailwidth = 2;
 };
 
 extern config_t config;

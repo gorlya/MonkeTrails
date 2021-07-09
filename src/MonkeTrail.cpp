@@ -4,6 +4,10 @@
 extern Logger& getLogger();
 #include "UnityEngine/LineRenderer.hpp"
 #include "UnityEngine/PrimitiveType.hpp"
+#include "UnityEngine/SkinnedMeshRenderer.hpp"
+#include "gorilla-utils/shared/Utils/Player.hpp"
+#include "Photon/Realtime/Player.hpp"
+#include "Photon/Pun/PhotonNetwork.hpp"
 
 #include <map>
 #include <deque>
@@ -11,10 +15,11 @@ extern Logger& getLogger();
 DEFINE_TYPE(Trail::MonkeTrail);
 namespace Trail
 {
+    bool moddedRoom = false;
 
     std::map<int, UnityEngine::LineRenderer*> monkeRenderer;
     std::map<int, std::deque<UnityEngine::Vector3>> monkeLines;
-    int maxPoints = 50, cooldownAmount = 10;
+    int cooldownAmount = 10;
     void MonkeTrail::ctor()
     {
         cooldown = 0;
@@ -26,12 +31,38 @@ namespace Trail
     }
 
     void RenderPoints(UnityEngine::LineRenderer *cRend, std::deque<UnityEngine::Vector3> &points, UnityEngine::Vector3 pos) {
+        int maxPoints = 50;
+        switch (config.trailsize) {
+          case 0:
+            maxPoints = 5;
+            break;
+          case 1:
+            maxPoints = 10;
+            break;
+          case 2:
+            maxPoints = 20;
+            break;
+          default:
+            maxPoints = 50;
+        }
         while (points.size() >= maxPoints) { points.pop_back(); }
 
         points.push_front(pos);
 
         cRend->set_positionCount(points.size());
-        cRend->set_startWidth(0.2f);
+        switch (config.trailwidth) {
+          case 0:
+            cRend->set_startWidth(0.05f);
+            break;
+          case 1:
+            cRend->set_startWidth(0.1f);
+            break;
+          case 2:
+            cRend->set_startWidth(0.2f);
+            break;
+          default:
+            cRend->set_startWidth(0.3f);
+        }
         cRend->set_endWidth(0.01f);
 
         int i = 0;
@@ -43,7 +74,7 @@ namespace Trail
     void MonkeTrail::Update()
     {
 
-        if (!config.enabled || config.monkemode == 0) {
+        if (!config.enabled) {
           auto &pts = monkeLines[playerId];
           pts.clear();
           if (markerEndPoint) { monkeRenderer[playerId]->set_positionCount(0); }
@@ -102,4 +133,55 @@ namespace Trail
             it.second->set_positionCount(0);
         }
     }
+
+    void markMonke(Photon::Realtime::Player *player) {
+        if (player == nullptr) { return; }
+        if (!moddedRoom) {
+          auto self = Photon::Pun::PhotonNetwork::get_LocalPlayer();
+          auto selfId = self->actorNumber;
+          if (selfId != player->actorNumber) {
+            return;
+          }
+        }
+
+        using namespace GlobalNamespace;
+        VRRig* monkeRig = GorillaUtils::Player::findPlayerVRRig(player);
+        if (monkeRig != nullptr) {
+            int playerId = player->actorNumber;
+            UnityEngine::GameObject* monkeHead = monkeRig->headMesh;
+            if (monkeHead!= nullptr && monkeRig->mainSkin != nullptr) {
+              auto mat = monkeRig->mainSkin->get_material();
+              Trail::MonkeTrail* trail = monkeHead->GetComponent<Trail::MonkeTrail*>();
+              if (trail == nullptr) {
+                  trail = monkeHead->AddComponent<Trail::MonkeTrail*>();
+              }
+
+              if (trail != nullptr) {
+                  trail->playerId = playerId;
+                  trail->material = mat;
+              }
+
+            }
+        }
+  }
+
+
+  void updateMonkes() {
+    using namespace GlobalNamespace;
+    using namespace Photon::Pun;
+    using namespace Photon::Realtime;
+
+    Array<Player*>* players = PhotonNetwork::get_PlayerList();
+    int playerCount = players->Length();
+
+    for (int i = 0; i < playerCount; i++) {
+      Player* player = players->values[i];
+      markMonke(player);
+    }
+  }
+
+  void setModded(bool v) {
+    moddedRoom = v;
+  }
+
 }

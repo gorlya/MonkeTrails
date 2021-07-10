@@ -24,6 +24,7 @@ void SaveConfig()
     getConfig().config.AddMember("trailmode", config.trailmode, allocator);
     getConfig().config.AddMember("trailsize", config.trailsize, allocator);
     getConfig().config.AddMember("trailwidth", config.trailwidth, allocator);
+    getConfig().config.AddMember("trailenabled", config.trailenabled, allocator);
 
     getConfig().Write();
     getLogger().info("Saved Configuration!");
@@ -39,6 +40,7 @@ bool LoadConfig()
     if (doc.HasMember("trailmode")) { config.trailmode = doc["trailmode"].GetInt(); } 
     if (doc.HasMember("trailsize")) { config.trailsize = doc["trailsize"].GetInt(); } 
     if (doc.HasMember("trailwidth")) { config.trailwidth = doc["trailwidth"].GetInt(); } 
+    if (doc.HasMember("trailenabled")) { config.trailenabled = doc["trailenabled"].GetInt(); }
 
     if (foundEverything) getLogger().info("Config Loaded Successfully!");
     return foundEverything;

@@ -22,15 +22,18 @@ namespace Trail
         trailModeSelector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
         trailSizeSelector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
         trailWidthSelector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
+        trailPublicSelector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
 
         settingSelector->max = 5;
         trailModeSelector->max = 2;
         trailSizeSelector->max = 4;
         trailWidthSelector->max = 4;
+        trailPublicSelector->max = 2;
 
         trailModeSelector->currentSelectionIndex = config.trailmode;;
         trailSizeSelector->currentSelectionIndex = config.trailsize;
         trailWidthSelector->currentSelectionIndex = config.trailwidth;
+        trailPublicSelector->currentSelectionIndex = config.trailenabled;
     }
 
     void TrailSettingsView::DidActivate(bool firstActivation)
@@ -47,7 +50,7 @@ namespace Trail
             config.enabled ^= 1;
             Trail::ClearAll();
         }
-        else if (index == 4)
+        else if (index == 5)
         {
             Trail::ClearAll();
         }
@@ -103,9 +106,10 @@ namespace Trail
         text += renderSelector(trailModeSelector, "Trail Mode:", { "ALL" }, index == 1);
         text += renderSelector(trailSizeSelector, "Trail Length:", { "S", "M", "L"}, index == 2);
         text += renderSelector(trailWidthSelector, "Trail Width:", { "S", "M", "L"}, index == 3);
+        text += renderSelector(trailPublicSelector, "Is Trail Public:", { "N", "Y" }, index == 4);
 
         text += "  Clean up:\n";
-        text += settingSelector->currentSelectionIndex == 4 ? " <color=#fd0000>></color> " : "   ";
+        text += settingSelector->currentSelectionIndex == 5 ? " <color=#fd0000>></color> " : "   ";
         text += "<color=#AADDAA><</color> ";
         text += " RUN CLEANUP ";
         text += " <color=#AADDAA>></color>";
@@ -127,6 +131,8 @@ namespace Trail
                 case 3:
                   trailWidthSelector->HandleKey(key);
                   break;
+                case 4:
+                  trailPublicSelector->HandleKey(key);
                 default:
                   break;
             }
@@ -135,6 +141,7 @@ namespace Trail
         config.trailmode = trailModeSelector->currentSelectionIndex;
         config.trailsize = trailSizeSelector->currentSelectionIndex;
         config.trailwidth = trailWidthSelector->currentSelectionIndex;
+        config.trailenabled = trailPublicSelector->currentSelectionIndex;
         Redraw();
         Trail::updateMonkes();
     }

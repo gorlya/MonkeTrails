@@ -6,6 +6,7 @@ extern Logger& getLogger();
 #include "UnityEngine/PrimitiveType.hpp"
 #include "UnityEngine/SkinnedMeshRenderer.hpp"
 #include "gorilla-utils/shared/Utils/Player.hpp"
+#include "gorilla-utils/shared/CustomProperties/Player.hpp"
 #include "Photon/Realtime/Player.hpp"
 #include "Photon/Pun/PhotonNetwork.hpp"
 
@@ -144,12 +145,12 @@ namespace Trail
 
     void markMonke(Photon::Realtime::Player *player) {
         if (player == nullptr) { return; }
-        if (!moddedRoom) {
-          auto self = Photon::Pun::PhotonNetwork::get_LocalPlayer();
-          auto selfId = self->actorNumber;
-          if (selfId != player->actorNumber) {
-            return;
-          }
+        auto self = Photon::Pun::PhotonNetwork::get_LocalPlayer();
+        auto selfId = self->actorNumber;
+        auto isEnabled = GorillaUtils::Player::GetProperty<bool>(player, "trailenabled");
+        getLogger().info("MARK MONKE: %i", isEnabled);
+        if (!isEnabled && selfId != player->actorNumber) {
+          return;
         }
 
         using namespace GlobalNamespace;

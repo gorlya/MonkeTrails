@@ -31,6 +31,7 @@
 #include "UI/TrailSettingsView.hpp"
 
 #include "gorilla-utils/shared/GorillaUtils.hpp"
+#include "gorilla-utils/shared/CustomProperties/Player.hpp"
 #include "gorilla-utils/shared/Utils/Player.hpp"
 #include "gorilla-utils/shared/Callbacks/InRoomCallbacks.hpp"
 #include "gorilla-utils/shared/Callbacks/MatchMakingCallbacks.hpp"
@@ -89,6 +90,9 @@ extern "C" void load()
 				Trail::setModded(!CRASH_UNLESS(il2cpp_utils::RunMethod<bool>(currentRoom, "get_IsVisible")));
 			}
 
+      auto self = Photon::Pun::PhotonNetwork::get_LocalPlayer();
+      getLogger().info("MONKE SELF: %x", self);
+      GorillaUtils::Player::SetProperty<bool>(self, "trailEnabled", config.trailenabled);
       Trail::updateMonkes();
     });
     GorillaUtils::InRoomCallbacks::add_OnPlayerPropertiesUpdate([&](auto player, auto){
@@ -102,6 +106,7 @@ extern "C" void load()
     GorillaUI::Register::RegisterWatchView<Trail::TrailSettingsView*>("Trail", VERSION);
 
     GorillaUI::CommandRegister::RegisterCommand("marker", [](std::vector<std::string> args) -> std::string {
+
         return "Not implemented yet.";
     }, "Allows you to change the way markers work, using arguments to specify what is being changed\n");
 }

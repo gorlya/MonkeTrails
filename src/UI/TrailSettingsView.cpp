@@ -45,6 +45,7 @@ namespace Trail
         if (index == 0)
         {
             config.enabled ^= 1;
+            Trail::ClearAll();
         }
         else if (index == 4)
         {

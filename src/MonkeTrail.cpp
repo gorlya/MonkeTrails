@@ -25,8 +25,18 @@ namespace Trail
         cooldown = 0;
     }
 
-    void MonkeTrail::Awake()
+    void MonkeTrail::OnDisable()
     {
+        auto it = monkeRenderer.find(playerId);
+        if (it != monkeRenderer.end()) {
+          monkeRenderer.erase(it);
+        }
+
+        if (trailObject != nullptr) {
+          Object::Destroy(trailObject);
+        }
+
+        trailObject = nullptr;
 
     }
 
@@ -73,12 +83,7 @@ namespace Trail
 
     void MonkeTrail::Update()
     {
-
         if (!config.enabled) {
-          auto &pts = monkeLines[playerId];
-          pts.clear();
-          if (markerEndPoint) { monkeRenderer[playerId]->set_positionCount(0); }
-
           return;
         }
 
@@ -86,22 +91,20 @@ namespace Trail
             cooldown--;
             return;
         }
-        cooldown = cooldownAmount;
+        cooldown = config.trailmode ? cooldownAmount / 2 : cooldownAmount;
 
-        if (!markerEndPoint)
+        if (!trailObject)
         {
-            UnityEngine::GameObject* point = UnityEngine::GameObject::CreatePrimitive(
+            trailObject = UnityEngine::GameObject::CreatePrimitive(
                 UnityEngine::PrimitiveType::Sphere);
-            auto rend = monkeRenderer[playerId] = point->AddComponent<UnityEngine::LineRenderer*>();
+            auto rend = monkeRenderer[playerId] = trailObject->AddComponent<UnityEngine::LineRenderer*>();
             rend->set_material(material);
 
             monkeLines[playerId] = {};
 
-            Object::DontDestroyOnLoad(point);
-
-            markerEndPoint = point->get_transform();
+            Object::DontDestroyOnLoad(trailObject);
         } else {
-            auto rend = markerEndPoint->get_gameObject()->GetComponent<UnityEngine::LineRenderer*>();
+            auto rend = trailObject->GetComponent<UnityEngine::LineRenderer*>();
             rend->set_material(material);
         }
 

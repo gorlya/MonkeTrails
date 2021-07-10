@@ -13,20 +13,20 @@ DECLARE_CLASS_CODEGEN(Trail, MonkeTrail, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_FIELD(int, playerId);
     DECLARE_INSTANCE_FIELD(int, cooldown);
     DECLARE_INSTANCE_FIELD(UnityEngine::Material*, material);
-    DECLARE_INSTANCE_FIELD(UnityEngine::Transform*, markerEndPoint);
+    DECLARE_INSTANCE_FIELD(UnityEngine::GameObject*, trailObject);
     DECLARE_METHOD(void, Update);
-    DECLARE_METHOD(void, Awake);
+    DECLARE_METHOD(void, OnDisable);
     DECLARE_CTOR(ctor);
 
 
     REGISTER_FUNCTION(
         REGISTER_METHOD(ctor);
         REGISTER_METHOD(Update);
-        REGISTER_METHOD(Awake);
+        REGISTER_METHOD(OnDisable);
         REGISTER_FIELD(playerId);
 
         REGISTER_FIELD(material);
-        REGISTER_FIELD(markerEndPoint);
+        REGISTER_FIELD(trailObject);
     )
 )
 namespace Trail {

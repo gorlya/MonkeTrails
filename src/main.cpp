@@ -94,12 +94,6 @@ extern "C" void load()
     GorillaUtils::InRoomCallbacks::add_OnPlayerPropertiesUpdate([&](auto player, auto){
         Trail::markMonke(player);
     });
-    GorillaUtils::InRoomCallbacks::add_OnPlayerLeftRoom([&](auto player){
-        if (player != nullptr) {
-            int playerId = player->actorNumber;
-            Trail::Clear(playerId);
-        }
-    });
 
     custom_types::Register::RegisterType<Trail::MonkeTrail>();
     custom_types::Register::RegisterType<Trail::TrailSettingsView>();

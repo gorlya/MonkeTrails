@@ -14,26 +14,41 @@ extern Logger& getLogger();
 
 using namespace GorillaUI;
 
+struct Selector {
+  UISelectionHandler* handler;
+  std::vector<std::string> options;
+  int* value;
+  std::string label;
+};
+
 namespace Trail
 {
+
+    Selector makeSelector(std::string label, std::vector<std::string> options, int *value) {
+        auto selector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
+        selector->max = options.size();
+        selector->currentSelectionIndex = *value;
+
+        Selector ret = {};
+        ret.handler = selector;
+        ret.options = options;
+        ret.value = value;
+        ret.label = label;
+        return ret;
+
+
+    }
+
+    std::vector<Selector> selectors;
     void TrailSettingsView::Awake()
     {
         settingSelector = new UISelectionHandler(EKeyboardKey::Up, EKeyboardKey::Down, EKeyboardKey::Enter, true, false);
-        trailModeSelector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
-        trailSizeSelector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
-        trailWidthSelector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
-        trailPublicSelector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
+        selectors.emplace_back(makeSelector("Trail Mode:", { "ALL" }, &config.trailmode));
+        selectors.emplace_back(makeSelector("Trail Length:", { "S", "M", "L"}, &config.trailsize));
+        selectors.emplace_back(makeSelector("Trail Width:", { "S", "M", "L"}, &config.trailwidth));
+        // selectors.emplace_back(makeSelector("Is Trail Public:", { "N", "Y" }, &config.enabled));
 
-        settingSelector->max = 5;
-        trailModeSelector->max = 2;
-        trailSizeSelector->max = 4;
-        trailWidthSelector->max = 4;
-        trailPublicSelector->max = 2;
-
-        trailModeSelector->currentSelectionIndex = config.trailmode;;
-        trailSizeSelector->currentSelectionIndex = config.trailsize;
-        trailWidthSelector->currentSelectionIndex = config.trailwidth;
-        trailPublicSelector->currentSelectionIndex = config.trailenabled;
+        settingSelector->max = selectors.size() + 1;
     }
 
     void TrailSettingsView::DidActivate(bool firstActivation)
@@ -50,7 +65,7 @@ namespace Trail
             config.enabled ^= 1;
             Trail::ClearAll();
         }
-        else if (index == 5)
+        else if (index == selectors.size())
         {
             Trail::ClearAll();
         }
@@ -75,16 +90,16 @@ namespace Trail
         text += "<color=#ffff00>== <color=#fdfdfd>Trail Settings</color> ==</color>\n";
     }
 
-    std::string renderSelector(auto modeSelector, std::string label, std::vector<std::string> options, bool enabled) {
+    std::string renderSelector(Selector &selector, bool enabled) {
         std::string ret = "";
-        ret += label;
+        ret += selector.label;
         ret += "  \n";
         ret += enabled ? " <color=#fd0000>></color> " : "   ";
         ret += "<color=#AADDAA><</color> ";
 
-        int val = modeSelector->currentSelectionIndex;
-        if (val < options.size()) {
-          ret += options[val];
+        int val = selector.handler->currentSelectionIndex;
+        if (val < selector.options.size()) {
+          ret += selector.options[val];
         } else {
           ret += "???";
         }
@@ -96,20 +111,19 @@ namespace Trail
 
     void TrailSettingsView::DrawSettings()
     {
+        int index = settingSelector->currentSelectionIndex;
         text += "  Trails are:\n";
-        text += settingSelector->currentSelectionIndex == 0 ? " <color=#fd0000>></color> " : "   ";
+        text += index == 0 ? " <color=#fd0000>></color> " : "   ";
         text += config.enabled ? "<color=#00fd00>enabled</color>" : "<color=#fd0000>disabled</color>";
 
-        int index = settingSelector->currentSelectionIndex;
 
         text += "\n";
-        text += renderSelector(trailModeSelector, "Trail Mode:", { "ALL" }, index == 1);
-        text += renderSelector(trailSizeSelector, "Trail Length:", { "S", "M", "L"}, index == 2);
-        text += renderSelector(trailWidthSelector, "Trail Width:", { "S", "M", "L"}, index == 3);
-        text += renderSelector(trailPublicSelector, "Is Trail Public:", { "N", "Y" }, index == 4);
+        for (int i = 0; i < selectors.size(); i++) {
+          text += renderSelector(selectors[i], index == i);
+        }
 
         text += "  Clean up:\n";
-        text += settingSelector->currentSelectionIndex == 5 ? " <color=#fd0000>></color> " : "   ";
+        text += index == 5 ? " <color=#fd0000>></color> " : "   ";
         text += "<color=#AADDAA><</color> ";
         text += " RUN CLEANUP ";
         text += " <color=#AADDAA>></color>";
@@ -120,28 +134,16 @@ namespace Trail
         EKeyboardKey key = (EKeyboardKey)value;
         if (!settingSelector->HandleKey(key)) // if it was not up/down/enter
         {
-            switch (settingSelector->currentSelectionIndex)
-            {
-                case 1:
-                  trailModeSelector->HandleKey(key);
-                  break;
-                case 2:
-                  trailSizeSelector->HandleKey(key);
-                  break;
-                case 3:
-                  trailWidthSelector->HandleKey(key);
-                  break;
-                case 4:
-                  trailPublicSelector->HandleKey(key);
-                default:
-                  break;
+            if (settingSelector->currentSelectionIndex < selectors.size()) {
+              selectors[settingSelector->currentSelectionIndex].handler->HandleKey(key);
             }
 
         }
-        config.trailmode = trailModeSelector->currentSelectionIndex;
-        config.trailsize = trailSizeSelector->currentSelectionIndex;
-        config.trailwidth = trailWidthSelector->currentSelectionIndex;
-        config.trailenabled = trailPublicSelector->currentSelectionIndex;
+
+        for (auto &selector : selectors) {
+          *selector.value = selector.handler->currentSelectionIndex;
+        }
+
         Redraw();
         Trail::updateMonkes();
     }

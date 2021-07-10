@@ -81,18 +81,7 @@ namespace Trail
         }
     }
 
-    void MonkeTrail::Update()
-    {
-        if (!config.enabled) {
-          return;
-        }
-
-        if (cooldown > 0) {
-            cooldown--;
-            return;
-        }
-        cooldown = config.trailmode ? cooldownAmount / 2 : cooldownAmount;
-
+    void MonkeTrail::UpdateRenderer() {
         if (!trailObject)
         {
             trailObject = UnityEngine::GameObject::CreatePrimitive(
@@ -108,10 +97,26 @@ namespace Trail
             rend->set_material(material);
         }
 
-        UnityEngine::Vector3 pos = get_transform()->get_position();
-        auto &pts = monkeLines[playerId];
+    }
 
-        RenderPoints(monkeRenderer[playerId], pts, pos);
+    void MonkeTrail::Update()
+    {
+        if (!config.enabled) {
+          return;
+        }
+
+        if (cooldown > 0) {
+            cooldown--;
+            return;
+        }
+        cooldown = config.trailmode ? cooldownAmount / 2 : cooldownAmount;
+
+        UnityEngine::Vector3 pos = get_transform()->get_position();
+
+        if (monkeLines.find(playerId) != monkeLines.end()) {
+          auto &pts = monkeLines[playerId];
+          RenderPoints(monkeRenderer[playerId], pts, pos);
+        }
 
 
     }
@@ -163,6 +168,8 @@ namespace Trail
                   trail->playerId = playerId;
                   trail->material = mat;
               }
+
+              trail->UpdateRenderer();
 
             }
         }

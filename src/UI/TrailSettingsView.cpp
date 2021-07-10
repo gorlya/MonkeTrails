@@ -19,12 +19,14 @@ struct Selector {
   std::vector<std::string> options;
   int* value;
   std::string label;
+  int changed = 0;
 };
 
 namespace Trail
 {
 
-    Selector makeSelector(std::string label, std::vector<std::string> options, int *value) {
+    std::vector<Selector> selectors;
+    void makeSelector(std::string label, std::vector<std::string> options, int *value) {
         auto selector = new UISelectionHandler(EKeyboardKey::Left, EKeyboardKey::Right, EKeyboardKey::Enter, false, true);
         selector->max = options.size();
         selector->currentSelectionIndex = *value;
@@ -34,19 +36,37 @@ namespace Trail
         ret.options = options;
         ret.value = value;
         ret.label = label;
-        return ret;
 
-
+        selectors.emplace_back(ret);
     }
 
-    std::vector<Selector> selectors;
+    std::string renderSelector(Selector &selector, bool enabled) {
+        std::string ret = "";
+        ret += selector.label;
+        ret += "  \n";
+        ret += enabled ? " <color=#fd0000>></color> " : "   ";
+        ret += "<color=#AADDAA><</color> ";
+
+        int val = selector.handler->currentSelectionIndex;
+        if (val < selector.options.size()) {
+          ret += selector.options[val];
+        } else {
+          ret += "???";
+        }
+
+        ret += " <color=#AADDAA>></color>";
+        ret += "\n";
+        return ret;
+    }
+
+
     void TrailSettingsView::Awake()
     {
         settingSelector = new UISelectionHandler(EKeyboardKey::Up, EKeyboardKey::Down, EKeyboardKey::Enter, true, false);
-        selectors.emplace_back(makeSelector("Trail Mode:", { "ALL" }, &config.trailmode));
-        selectors.emplace_back(makeSelector("Trail Length:", { "S", "M", "L"}, &config.trailsize));
-        selectors.emplace_back(makeSelector("Trail Width:", { "S", "M", "L"}, &config.trailwidth));
-        // selectors.emplace_back(makeSelector("Is Trail Public:", { "N", "Y" }, &config.enabled));
+        makeSelector("Trail Mode:", { "ALL" }, &config.trailmode);
+        makeSelector("Trail Length:", { "S", "M", "L"}, &config.trailsize);
+        makeSelector("Trail Width:", { "S", "M", "L"}, &config.trailwidth);
+        makeSelector("Public Trail?:", { "N", "Y" }, &config.trailenabled);
 
         settingSelector->max = selectors.size() + 1;
     }
@@ -90,25 +110,6 @@ namespace Trail
         text += "<color=#ffff00>== <color=#fdfdfd>Trail Settings</color> ==</color>\n";
     }
 
-    std::string renderSelector(Selector &selector, bool enabled) {
-        std::string ret = "";
-        ret += selector.label;
-        ret += "  \n";
-        ret += enabled ? " <color=#fd0000>></color> " : "   ";
-        ret += "<color=#AADDAA><</color> ";
-
-        int val = selector.handler->currentSelectionIndex;
-        if (val < selector.options.size()) {
-          ret += selector.options[val];
-        } else {
-          ret += "???";
-        }
-
-        ret += " <color=#AADDAA>></color>";
-        ret += "\n";
-        return ret;
-    }
-
     void TrailSettingsView::DrawSettings()
     {
         int index = settingSelector->currentSelectionIndex;
@@ -116,14 +117,13 @@ namespace Trail
         text += index == 0 ? " <color=#fd0000>></color> " : "   ";
         text += config.enabled ? "<color=#00fd00>enabled</color>" : "<color=#fd0000>disabled</color>";
 
-
         text += "\n";
         for (int i = 0; i < selectors.size(); i++) {
           text += renderSelector(selectors[i], index == i);
         }
 
         text += "  Clean up:\n";
-        text += index == 5 ? " <color=#fd0000>></color> " : "   ";
+        text += index == selectors.size() ? " <color=#fd0000>></color> " : "   ";
         text += "<color=#AADDAA><</color> ";
         text += " RUN CLEANUP ";
         text += " <color=#AADDAA>></color>";
@@ -141,7 +141,18 @@ namespace Trail
         }
 
         for (auto &selector : selectors) {
+          selector.changed = *selector.value != selector.handler->currentSelectionIndex;
           *selector.value = selector.handler->currentSelectionIndex;
+
+          if (selector.changed && selector.value == &config.trailenabled) {
+            GorillaUtils::Player::SetProperty<bool>(Photon::Pun::PhotonNetwork::get_LocalPlayer(),
+              "trailEnabled", config.trailenabled);
+
+          }
+        }
+
+        for (auto &selector : selectors) {
+          selector.changed = false;
         }
 
         Redraw();

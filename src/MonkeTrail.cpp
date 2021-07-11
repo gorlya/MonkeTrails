@@ -147,7 +147,7 @@ namespace Trail
         if (player == nullptr) { return; }
         auto self = Photon::Pun::PhotonNetwork::get_LocalPlayer();
         auto selfId = self->actorNumber;
-        auto isEnabled = GorillaUtils::Player::GetProperty<bool>(player, "trailenabled");
+        auto isEnabled = GorillaUtils::Player::GetProperty<bool>(player, "trailEnabled");
         getLogger().info("MARK MONKE: %i", isEnabled);
         if (!isEnabled && selfId != player->actorNumber) {
           return;

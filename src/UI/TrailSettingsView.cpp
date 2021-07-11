@@ -63,9 +63,9 @@ namespace Trail
     void TrailSettingsView::Awake()
     {
         settingSelector = new UISelectionHandler(EKeyboardKey::Up, EKeyboardKey::Down, EKeyboardKey::Enter, true, false);
-        makeSelector("Trail Mode:", { "ALL" }, &config.trailmode);
-        makeSelector("Trail Length:", { "S", "M", "L"}, &config.trailsize);
-        makeSelector("Trail Width:", { "S", "M", "L"}, &config.trailwidth);
+        makeSelector("Trail Mode:", { "ALL", "???" }, &config.trailmode);
+        makeSelector("Trail Length:", { "S", "M", "L", "???"}, &config.trailsize);
+        makeSelector("Trail Width:", { "S", "M", "L", "???"}, &config.trailwidth);
         makeSelector("Public Trail?:", { "N", "Y" }, &config.trailenabled);
 
         settingSelector->max = selectors.size() + 1;
@@ -119,11 +119,11 @@ namespace Trail
 
         text += "\n";
         for (int i = 0; i < selectors.size(); i++) {
-          text += renderSelector(selectors[i], index == i);
+          text += renderSelector(selectors[i], index == i+1);
         }
 
         text += "  Clean up:\n";
-        text += index == selectors.size() ? " <color=#fd0000>></color> " : "   ";
+        text += index == selectors.size() + 1 ? " <color=#fd0000>></color> " : "   ";
         text += "<color=#AADDAA><</color> ";
         text += " RUN CLEANUP ";
         text += " <color=#AADDAA>></color>";
@@ -135,7 +135,7 @@ namespace Trail
         if (!settingSelector->HandleKey(key)) // if it was not up/down/enter
         {
             if (settingSelector->currentSelectionIndex < selectors.size()) {
-              selectors[settingSelector->currentSelectionIndex].handler->HandleKey(key);
+              selectors[settingSelector->currentSelectionIndex-1].handler->HandleKey(key);
             }
 
         }

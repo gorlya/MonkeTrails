@@ -41,9 +41,11 @@ namespace Trail
 
     }
 
-    void RenderPoints(UnityEngine::LineRenderer *cRend, std::deque<UnityEngine::Vector3> &points, UnityEngine::Vector3 pos) {
+    void RenderPoints(UnityEngine::LineRenderer *cRend, std::deque<UnityEngine::Vector3> &points, UnityEngine::Vector3 pos, int size) {
         int maxPoints = 50;
-        switch (config.trailsize) {
+        switch (size) {
+          case -1:
+            return;
           case 0:
             maxPoints = 5;
             break;
@@ -110,13 +112,14 @@ namespace Trail
             cooldown--;
             return;
         }
-        cooldown = config.trailmode ? cooldownAmount / 2 : cooldownAmount;
+
+        cooldown = cooldownAmount / 2;
 
         UnityEngine::Vector3 pos = get_transform()->get_position();
 
         if (monkeLines.find(playerId) != monkeLines.end()) {
           auto &pts = monkeLines[playerId];
-          RenderPoints(monkeRenderer[playerId], pts, pos);
+          RenderPoints(monkeRenderer[playerId], pts, pos, this->size);
         }
 
 
@@ -145,13 +148,22 @@ namespace Trail
 
     void markMonke(Photon::Realtime::Player *player) {
         if (player == nullptr) { return; }
+
+        int trailSize = -1;
         auto self = Photon::Pun::PhotonNetwork::get_LocalPlayer();
         auto selfId = self->actorNumber;
-        auto isEnabled = GorillaUtils::Player::GetProperty<bool>(player, "trailEnabled");
-        getLogger().info("MARK MONKE: %i", isEnabled);
-        if (!isEnabled && selfId != player->actorNumber) {
-          return;
+
+        bool isSelf = selfId == player->actorNumber;
+        if (isSelf || (moddedRoom && config.trailmode)) {
+          trailSize = config.trailsize;
+        } else {
+          trailSize = GorillaUtils::Player::GetProperty<int>(player, "trailSize").value_or(-1);
+          if (trailSize == -1) {
+            Clear(player->actorNumber);
+          }
         }
+
+        getLogger().info("MARK MONKE: %i", trailSize);
 
         using namespace GlobalNamespace;
         VRRig* monkeRig = GorillaUtils::Player::findPlayerVRRig(player);
@@ -168,6 +180,7 @@ namespace Trail
               if (trail != nullptr) {
                   trail->playerId = playerId;
                   trail->material = mat;
+                  trail->size = trailSize;
               }
 
               trail->UpdateRenderer();

@@ -63,10 +63,9 @@ namespace Trail
     void TrailSettingsView::Awake()
     {
         settingSelector = new UISelectionHandler(EKeyboardKey::Up, EKeyboardKey::Down, EKeyboardKey::Enter, true, false);
-        makeSelector("Trail Mode:", { "ALL", "???" }, &config.trailmode);
         makeSelector("Trail Length:", { "S", "M", "L", "???"}, &config.trailsize);
         makeSelector("Trail Width:", { "S", "M", "L", "???"}, &config.trailwidth);
-        makeSelector("Public Trail?:", { "N", "Y" }, &config.trailenabled);
+        makeSelector("Public Trail?", { "N", "Y" }, &config.trailpublic);
 
         settingSelector->max = selectors.size() + 1;
     }
@@ -83,10 +82,6 @@ namespace Trail
         if (index == 0)
         {
             config.enabled ^= 1;
-            Trail::ClearAll();
-        }
-        else if (index == selectors.size())
-        {
             Trail::ClearAll();
         }
     }
@@ -121,12 +116,6 @@ namespace Trail
         for (int i = 0; i < selectors.size(); i++) {
           text += renderSelector(selectors[i], index == i+1);
         }
-
-        text += "  Clean up:\n";
-        text += index == selectors.size() + 1 ? " <color=#fd0000>></color> " : "   ";
-        text += "<color=#AADDAA><</color> ";
-        text += " RUN CLEANUP ";
-        text += " <color=#AADDAA>></color>";
     }
 
     void TrailSettingsView::OnKeyPressed(int value)
@@ -134,25 +123,38 @@ namespace Trail
         EKeyboardKey key = (EKeyboardKey)value;
         if (!settingSelector->HandleKey(key)) // if it was not up/down/enter
         {
-            if (settingSelector->currentSelectionIndex < selectors.size()) {
+            if (settingSelector->currentSelectionIndex <= selectors.size()) {
               selectors[settingSelector->currentSelectionIndex-1].handler->HandleKey(key);
             }
 
         }
 
+        bool needBroadcast = false;
         for (auto &selector : selectors) {
           selector.changed = *selector.value != selector.handler->currentSelectionIndex;
           *selector.value = selector.handler->currentSelectionIndex;
 
-          if (selector.changed && selector.value == &config.trailenabled) {
-            GorillaUtils::Player::SetProperty<bool>(Photon::Pun::PhotonNetwork::get_LocalPlayer(),
-              "trailEnabled", config.trailenabled);
-
+          if (selector.changed) {
+            if (selector.value == &config.trailsize || selector.value == &config.trailpublic) {
+              needBroadcast = true;
+            }
           }
         }
 
         for (auto &selector : selectors) {
           selector.changed = false;
+        }
+
+
+        if (needBroadcast) {
+          if (config.trailpublic) {
+              GorillaUtils::Player::SetProperty<int>(Photon::Pun::PhotonNetwork::get_LocalPlayer(),
+                "trailSize", config.trailsize);
+          } else {
+              GorillaUtils::Player::SetProperty<int>(Photon::Pun::PhotonNetwork::get_LocalPlayer(),
+                "trailSize", -1);
+
+          }
         }
 
         Redraw();

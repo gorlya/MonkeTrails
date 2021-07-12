@@ -5,7 +5,7 @@ struct config_t {
     int trailmode = 1;
     int trailsize = 1;
     int trailwidth = 2;
-    int trailenabled = 1;
+    int trailpublic = 0;
 };
 
 extern config_t config;

@@ -90,7 +90,10 @@ extern "C" void load()
 				Trail::setModded(!CRASH_UNLESS(il2cpp_utils::RunMethod<bool>(currentRoom, "get_IsVisible")));
 			}
 
-      GorillaUtils::Player::SetProperty<bool>(Photon::Pun::PhotonNetwork::get_LocalPlayer(), "trailEnabled", config.trailenabled);
+      if (config.trailpublic) {
+        GorillaUtils::Player::SetProperty<int>(Photon::Pun::PhotonNetwork::get_LocalPlayer(), "trailSize", config.trailsize);
+      }
+
       Trail::updateMonkes();
     });
     GorillaUtils::InRoomCallbacks::add_OnPlayerPropertiesUpdate([&](auto player, auto){

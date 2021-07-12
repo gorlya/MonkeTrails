@@ -12,6 +12,7 @@
 DECLARE_CLASS_CODEGEN(Trail, MonkeTrail, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_FIELD(int, playerId);
     DECLARE_INSTANCE_FIELD(int, cooldown);
+    DECLARE_INSTANCE_FIELD(int, size);
     DECLARE_INSTANCE_FIELD(UnityEngine::Material*, material);
     DECLARE_INSTANCE_FIELD(UnityEngine::GameObject*, trailObject);
     DECLARE_METHOD(void, Update);
@@ -27,6 +28,7 @@ DECLARE_CLASS_CODEGEN(Trail, MonkeTrail, UnityEngine::MonoBehaviour,
         REGISTER_METHOD(OnDisable);
         REGISTER_FIELD(playerId);
 
+        REGISTER_FIELD(size);
         REGISTER_FIELD(material);
         REGISTER_FIELD(trailObject);
     )

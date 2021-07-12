@@ -64,20 +64,22 @@ namespace Trail
 
 
         cRend->set_positionCount(points.size());
+        double sw = 0.3;
         switch (config.trailwidth) {
           case 0:
-            cRend->set_startWidth(0.05f);
+            sw = 0.05;
             break;
           case 1:
-            cRend->set_startWidth(0.1f);
+            sw = 0.1;
             break;
           case 2:
-            cRend->set_startWidth(0.2f);
+            sw = 0.2;
             break;
           default:
-            cRend->set_startWidth(0.3f);
+            sw = 0.3;
         }
-        cRend->set_endWidth(0.01f);
+        cRend->set_startWidth(sw);
+        cRend->set_endWidth(0.01);
 
         int i = 0;
         for (auto pt : points) {
@@ -155,7 +157,7 @@ namespace Trail
         auto selfId = self->actorNumber;
 
         bool isSelf = selfId == player->actorNumber;
-        if (isSelf || (moddedRoom && config.trailmode)) {
+        if (isSelf || moddedRoom) {
           trailSize = config.trailsize;
         } else {
           trailSize = GorillaUtils::Player::GetProperty<int>(player, "trailSize").value_or(-1);

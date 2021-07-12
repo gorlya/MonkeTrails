@@ -37,7 +37,7 @@ bool LoadConfig()
     rapidjson::Document& doc = getConfig().config;
     
     if (doc.HasMember("enabled")) { config.enabled = doc["enabled"].GetBool(); }
-    if (doc.HasMember("trailmode")) { config.trailmode = doc["trailmode"].GetInt(); } 
+    // if (doc.HasMember("trailmode")) { config.trailmode = doc["trailmode"].GetInt(); } 
     if (doc.HasMember("trailsize")) { config.trailsize = doc["trailsize"].GetInt(); } 
     if (doc.HasMember("trailwidth")) { config.trailwidth = doc["trailwidth"].GetInt(); } 
     if (doc.HasMember("trailpublic")) { config.trailpublic = doc["trailpublic"].GetInt(); }

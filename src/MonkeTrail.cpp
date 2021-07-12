@@ -45,7 +45,7 @@ namespace Trail
         int maxPoints = 50;
         switch (size) {
           case -1:
-            return;
+            maxPoints = 0;
           case 0:
             maxPoints = 5;
             break;
@@ -58,9 +58,10 @@ namespace Trail
           default:
             maxPoints = 50;
         }
-        while (points.size() >= maxPoints) { points.pop_back(); }
 
         points.push_front(pos);
+        while (points.size() > maxPoints) { points.pop_back(); }
+
 
         cRend->set_positionCount(points.size());
         switch (config.trailwidth) {
@@ -158,9 +159,6 @@ namespace Trail
           trailSize = config.trailsize;
         } else {
           trailSize = GorillaUtils::Player::GetProperty<int>(player, "trailSize").value_or(-1);
-          if (trailSize == -1) {
-            Clear(player->actorNumber);
-          }
         }
 
         getLogger().info("MARK MONKE: %i", trailSize);

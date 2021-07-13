@@ -20,7 +20,7 @@ namespace Trail
 
     std::map<int, UnityEngine::LineRenderer*> monkeRenderer;
     std::map<int, std::deque<UnityEngine::Vector3>> monkeLines;
-    int cooldownAmount = 10;
+    int cooldownAmount = 5;
     void MonkeTrail::ctor()
     {
         cooldown = 0;
@@ -116,7 +116,7 @@ namespace Trail
             return;
         }
 
-        cooldown = cooldownAmount / 2;
+        cooldown = cooldownAmount;
 
         UnityEngine::Vector3 pos = get_transform()->get_position();
 

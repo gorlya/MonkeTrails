@@ -63,9 +63,12 @@ namespace Trail
     void TrailSettingsView::Awake()
     {
         settingSelector = new UISelectionHandler(EKeyboardKey::Up, EKeyboardKey::Down, EKeyboardKey::Enter, true, false);
-        makeSelector("Trail Length:", { "S", "M", "L", "???"}, &config.trailsize);
-        makeSelector("Trail Width:", { "S", "M", "L", "???"}, &config.trailwidth);
-        makeSelector("Public Trail?", { "N", "Y" }, &config.trailpublic);
+
+        if (selectors.size() == 0) {
+          makeSelector("Trail Length:", { "S", "M", "L", "???"}, &config.trailsize);
+          makeSelector("Trail Width:", { "S", "M", "L", "???"}, &config.trailwidth);
+          makeSelector("Public Trail?", { "N", "Y" }, &config.trailpublic);
+        }
 
         settingSelector->max = selectors.size() + 1;
     }

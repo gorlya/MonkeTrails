@@ -46,6 +46,7 @@ namespace Trail
         switch (size) {
           case -1:
             maxPoints = 0;
+            break;
           case 0:
             maxPoints = 5;
             break;

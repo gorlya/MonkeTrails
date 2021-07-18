@@ -82,8 +82,8 @@ extern "C" void load()
 
     Logger& logger = getLogger();
 
-    GorillaUtils::MatchMakingCallbacks::add_OnLeftRoom([&](){ Trail::ClearAll(); });
-    GorillaUtils::MatchMakingCallbacks::add_OnJoinedRoom([&](){
+    GorillaUtils::MatchMakingCallbacks::onLeftRoomEvent() += {[&](){ Trail::ClearAll(); }};
+    GorillaUtils::MatchMakingCallbacks::onJoinedRoomEvent() += {[&](){
       Trail::ClearAll();
 			Il2CppObject* currentRoom = CRASH_UNLESS(il2cpp_utils::RunMethod("Photon.Pun", "PhotonNetwork", "get_CurrentRoom"));
 			if (currentRoom) {
@@ -95,13 +95,12 @@ extern "C" void load()
       }
 
       Trail::updateMonkes();
-    });
-    GorillaUtils::InRoomCallbacks::add_OnPlayerPropertiesUpdate([&](auto player, auto){
+    }};
+    GorillaUtils::InRoomCallbacks::onPlayerPropertiesUpdateEvent() += {[&](auto player, auto){
         Trail::markMonke(player);
-    });
+    }};
 
-    custom_types::Register::RegisterType<Trail::MonkeTrail>();
-    custom_types::Register::RegisterType<Trail::TrailSettingsView>();
+    custom_types::Register::AutoRegister();
 
     GorillaUI::Register::RegisterSettingsView<Trail::TrailSettingsView*>("Trail", VERSION);
     GorillaUI::Register::RegisterWatchView<Trail::TrailSettingsView*>("Trail", VERSION);

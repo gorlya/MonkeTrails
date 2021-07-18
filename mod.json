@@ -3,7 +3,7 @@
     "name": "Trails",
     "id": "trails",
     "author": "okxy",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "packageId": "com.AnotherAxiom.GorillaTag",
     "packageVersion": "1.0.10",
     "description": "Draw with bodies!",
@@ -12,13 +12,13 @@
     "dependencies": [
         {
             "id": "MonkeComputer",
-            "version": ">=1.5.2",
-            "downloadIfMissing": "https://github.com/RedBrumbler/MonkeComputer/releases/latest/download/MonkeComputer.qmod"
+            "version": ">=1.6.0",
+            "downloadIfMissing": "https://github.com/RedBrumbler/MonkeComputer/releases/download/v1.6.0/MonkeComputer.qmod"
         },
         {
             "id": "gorillautils",
-            "version": ">=0.1.9",
-            "downloadIfMissing": "https://github.com/RedBrumbler/GorillaUtils/releases/latest/download/GorillaUtils.qmod"
+            "version": ">=0.2.2",
+            "downloadIfMissing": "https://github.com/RedBrumbler/GorillaUtils/releases/download/v0.2.2/GorillaUtils.qmod"
         },
         {
             "id": "monkecodegen",
@@ -30,7 +30,8 @@
 		"libtrail.so"
     ],
     "libraryFiles": [
-    "libbeatsaber-hook_1_3_5.so"
+    "libbeatsaber-hook_2_0_3.so",
+    "libcustom-types.so"
     ],
     "fileCopies": [
     ]

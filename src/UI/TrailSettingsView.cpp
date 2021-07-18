@@ -8,7 +8,7 @@
 
 #include <vector>
 
-DEFINE_TYPE(Trail::TrailSettingsView);
+DEFINE_TYPE(Trail, TrailSettingsView);
 
 extern Logger& getLogger();
 

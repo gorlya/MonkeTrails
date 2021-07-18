@@ -13,7 +13,7 @@ extern Logger& getLogger();
 #include <map>
 #include <deque>
 
-DEFINE_TYPE(Trail::MonkeTrail);
+DEFINE_TYPE(Trail, MonkeTrail);
 namespace Trail
 {
     bool moddedRoom = false;

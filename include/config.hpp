@@ -4,7 +4,7 @@ struct config_t {
     bool enabled = true;
     int trailmode = 1;
     int trailsize = 1;
-    int trailwidth = 2;
+    int trailwidth = 1;
     int trailpublic = 0;
 };
 

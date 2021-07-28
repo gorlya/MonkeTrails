@@ -126,7 +126,8 @@ namespace Trail
         EKeyboardKey key = (EKeyboardKey)value;
         if (!settingSelector->HandleKey(key)) // if it was not up/down/enter
         {
-            if (settingSelector->currentSelectionIndex <= selectors.size()) {
+            int curIndex = settingSelector->currentSelectionIndex;
+            if (curIndex > 1 && curIndex <= selectors.size()) {
               selectors[settingSelector->currentSelectionIndex-1].handler->HandleKey(key);
             }
 
